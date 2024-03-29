@@ -108,19 +108,26 @@ genAtrib = do ty <- elements types
               exp <- genExp
               return (Atrib t v exp)
 
-genWhile :: Gen Inst
-genWhile = do exp <- genExp
-              blocoC <- genBlocoC
-              return (While exp blocoC)
+genWhile :: Int -> Gen Inst
+genWhile n = do exp <- genExp
+                blocoC <- genBlocoC2 (n-1)
+                return (While exp blocoC)
 
-genIFE :: Gen Inst
-genIFE = do exp <- genExp
-            blocoC1 <- genBlocoC
-            blocoC2 <- genBlocoC
-            return (IFE exp blocoC1 blocoC2)
+genIFE :: Int -> Gen Inst
+genIFE n = do exp <- genExp
+              blocoC1 <- genBlocoC2 (n-1)
+              blocoC2 <- genBlocoC2 (n-1)
+              return (IFE exp blocoC1 blocoC2)
 
-genBlocoCAux :: Gen Inst
-genBlocoCAux = frequency [(30,genInline),(10,genDec),(50,genAtrib),(5,genWhile),(5,genIFE)]
+-- genBlocoCAux :: Gen Inst
+-- genBlocoCAux = frequency [(300,genInline),(100,genDec),(500,genAtrib),(1,genWhile),(1,genIFE)]
+
+genBlocoCAux :: Int -> Gen Inst
+genBlocoCAux n = frequency [(300,genInline),(100,genDec),(500,genAtrib),(1*n,genWhile n),(1*n,genIFE n)]
+
+
+genBlocoC2 :: Int -> Gen [Inst]
+genBlocoC2 n = listOf1 (genBlocoCAux n)
 
 genBlocoC :: Gen [Inst]
-genBlocoC = listOf1 genBlocoCAux
+genBlocoC = genBlocoC2 1

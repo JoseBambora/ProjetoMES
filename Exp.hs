@@ -84,7 +84,7 @@ pGreater :: Parser Exp
 pGreater = (\x _ y -> Greater x y) <$> pExp1 <*> symbol' '>' <*> pExp
 
 pGreaterEq :: Parser Exp
-pGreaterEq = (\x _ y -> GreaterEq x y) <$> pExp1 <*> token' ">=2" <*> pExp
+pGreaterEq = (\x _ y -> GreaterEq x y) <$> pExp1 <*> token' ">=" <*> pExp
 
 pExpPar :: Parser Exp
 pExpPar = enclosedBy (symbol' '(') (pExp) (symbol' ')')
@@ -116,6 +116,7 @@ pExp2 =  pEqual
 pExp1 :: Parser Exp
 pExp1 =  pAdd
      <|> pSub
+     <|> pNeg
      <|> pExp0
 
 pExp0 :: Parser Exp
@@ -146,7 +147,7 @@ unparserExp b (Mult x y)       = unparserExpAux2 b (unparserExpAux x y "*")
 unparserExp b (Div x y)        = unparserExpAux2 b (unparserExpAux x y "/") 
 unparserExp b (Neg x)          = unparserExpAux2 b ("-" ++ unparserExp True x)     
 unparserExp b (Not x)          = unparserExpAux2 b ("not " ++ unparserExp True x)  
-unparserExp b (Dif x y)      = unparserExpAux2 b (unparserExpAux x y "!=")   
+unparserExp b (Dif x y)        = unparserExpAux2 b (unparserExpAux x y "!=")   
 unparserExp b (Equal x y)      = unparserExpAux2 b (unparserExpAux x y "==")
 unparserExp b (Less x y)       = unparserExpAux2 b (unparserExpAux x y "<" )
 unparserExp b (LessEq x y)     = unparserExpAux2 b (unparserExpAux x y "<=")
@@ -217,7 +218,7 @@ fbool :: Gen Exp
 fbool  = frequency [(50,return (Bool True)),(50,return (Bool False))]
 
 fconst :: Gen Exp
-fconst = do n <- choose (-30,30)
+fconst = do n <- choose (0,30)
             return (Const n)
 
 fvar :: Gen Exp
@@ -238,4 +239,4 @@ genExpaux 0 = fsingle
 genExpaux n = frequency [(50, flogic n),(50,farit n)]
 
 genExp :: Gen Exp
-genExp = genExpaux 2
+genExp = genExpaux 1

@@ -3,10 +3,9 @@ module Gen where
 
 import Test.QuickCheck
 import PicoC
+import Parser
+import Exp
+import Inst
 
-
-
--- parser (unparser ast) == ast
-
-prop_parser :: PicoC -> Property
-prop_parser (PicoC c) = collect (length c) $ parser (unparser (PicoC c)) == (PicoC c)
+prop_parser :: PicoC -> Bool
+prop_parser (PicoC c) = parser (unparser (PicoC c)) == (PicoC c)
