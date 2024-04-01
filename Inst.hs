@@ -91,43 +91,77 @@ unparserInsts t l = foldr (\x acc -> x ++ "\n" ++ acc)""(map (unparserInst t) l)
 -}
 
 types = ["int","char"]
+varslista = ["a","b","c","d","e","f"]
 
-genInline :: Gen Inst
-genInline = do exp <- genExp
-               return (Inline exp)
+getNVar :: [String] -> [String]
+getNVar l | len == 0 = [""]
+          | otherwise = r
+      where
+            r = filter (\x -> notElem x l) varslista
+            len = length r 
 
-genDec :: Gen Inst
-genDec = do t <- elements types
-            v <- elements vars
-            return (Dec t v)
+genDec :: [String] -> Gen (Inst,String)
+genDec vars = do t <- elements types
+                 v <- elements (getNVar vars)
+                 return (Dec t v,v)
 
-genAtrib :: Gen Inst
-genAtrib = do ty <- elements types
-              t <- frequency [(50,return ""),(50,return ty)]
-              v <- elements vars
-              exp <- genExp
-              return (Atrib t v exp)
+genAtribDec :: String -> [String] -> Exp -> Gen (Inst,String)
+genAtribDec ty vars e = do v <- elements (getNVar vars)
+                           return ((Atrib ty v e),v)
 
-genWhile :: Int -> Gen Inst
-genWhile n = do exp <- genExp
-                blocoC <- genBlocoC2 (n-1)
-                return (While exp blocoC)
+genAtribNoDec :: [String] -> Exp -> Gen (Inst,String)
+genAtribNoDec vars e = do v <- choose(0,length vars - 1)
+                          return ((Atrib "" (vars !! v)  e),"")
 
-genIFE :: Int -> Gen Inst
-genIFE n = do exp <- genExp
-              blocoC1 <- genBlocoC2 (n-1)
-              blocoC2 <- genBlocoC2 (n-1)
-              return (IFE exp blocoC1 blocoC2)
+genAtrib :: [String] -> Gen (Inst,String)
+genAtrib vars = do ty <- elements types
+                   exp <- genExp vars
+                   res <- frequency [(80*d1,(genAtribNoDec vars exp)),(20*d, (genAtribDec ty vars exp))]
+                   return res
+      where
+            d = (length varslista) - (length vars)
+            d1 = (length vars)
+
+genInline :: [String] -> Gen (Inst,String)
+genInline vars = do exp <- genExp vars
+                    return ((Inline exp),"")
+
+genWhile :: Int -> [String] -> Gen (Inst,String)
+genWhile n vars = do exp <- genExp vars
+                     blocoC <- genBlocoC2 (n-1) vars
+                     return ((While exp blocoC),"")
+
+genIFE :: Int -> [String]  -> Gen (Inst,String)
+genIFE n vars = do exp <- genExp vars
+                   blocoC1 <- genBlocoC2 (n-1) vars
+                   blocoC2 <- genBlocoC2 (n-1) vars
+                   return ((IFE exp blocoC1 blocoC2),"")
 
 -- genBlocoCAux :: Gen Inst
 -- genBlocoCAux = frequency [(300,genInline),(100,genDec),(500,genAtrib),(1,genWhile),(1,genIFE)]
 
-genBlocoCAux :: Int -> Gen Inst
-genBlocoCAux n = frequency [(300,genInline),(100,genDec),(500,genAtrib),(1*n,genWhile n),(1*n,genIFE n)]
+genBlocoCAux :: Int -> [String] -> Gen (Inst,String)
+genBlocoCAux n vars = frequency [(300*num1,genInline vars),
+                                 (50*num,genDec vars),
+                                 (500*num1,genAtrib vars),
+                                 (50*n*num1,genWhile n vars),
+                                 (50*n*num1,genIFE n vars)]
+      where
+            l1 = length vars
+            l2 = length varslista
+            num = l2 - l1
+            num1 = (l1 - 7) * (-1)
 
+genBlocC2Vars :: String -> [String] -> [String]
+genBlocC2Vars "" l = l
+genBlocC2Vars h t = h:t
 
-genBlocoC2 :: Int -> Gen [Inst]
-genBlocoC2 n = listOf1 (genBlocoCAux n)
+genBlocoC2 :: Int -> [String]-> Gen [Inst]
+genBlocoC2 0 vars = do (h,_) <- genBlocoCAux 0 vars
+                       return [h]
+genBlocoC2 n vars = do (h,v) <- genBlocoCAux n vars
+                       t <- genBlocoC2 (n-1) (genBlocC2Vars v vars)
+                       return (h:t)
 
 genBlocoC :: Gen [Inst]
-genBlocoC = genBlocoC2 1
+genBlocoC = genBlocoC2 3 []

@@ -14,7 +14,7 @@ exec_exp_aux :: (Exp,Exp,[String]) -> Bool
 exec_exp_aux (x,y,z) = (exec_exp x z) && (exec_exp y z)
 
 exec_exp :: Exp -> [String] -> Bool
-exec_exp (Var s) l = length (filter (\x -> x == s) l) > 1
+exec_exp (Var s) l = length (filter (\x -> x == s) l) > 0
 exec_exp (Add e1 e2) l = exec_exp_aux (e1,e2,l)
 exec_exp (Sub e1 e2) l = exec_exp_aux (e1,e2,l)
 exec_exp (Mult e1 e2) l = exec_exp_aux (e1,e2,l)
@@ -25,6 +25,8 @@ exec_exp (Less e1 e2) l = exec_exp_aux (e1,e2,l)
 exec_exp (LessEq e1 e2) l = exec_exp_aux (e1,e2,l)
 exec_exp (Greater e1 e2) l = exec_exp_aux (e1,e2,l)
 exec_exp (GreaterEq e1 e2) l = exec_exp_aux (e1,e2,l)
+exec_exp (Not e) l = exec_exp e l
+exec_exp (Neg e) l = exec_exp e l
 exec_exp _ _ = True
 
 -- Nova variavel
@@ -50,13 +52,13 @@ prop_dev_varsaux [] _ = True
 prop_dev_varsaux (x:xs) vars | ea && eb = prop_dev_varsaux xs ev
                              | otherwise = False
     where
-        ev = exec_var x vars
-        ea = exec_atrib x ev
+        ea = exec_atrib x vars
         eb = exec_bloco x vars
+        ev = exec_var x vars
 
 prop_dev_vars :: PicoC -> Bool
 prop_dev_vars (PicoC l) = prop_dev_varsaux l []
 
 
 -- teste
-testepropvars = prop_dev_vars (PicoC [Dec "int" "v"])
+testepropvars = prop_dev_vars (parser "char e = not True; int d = e!=e; if (3==False) then {         e*e; } else {         e = -e; } char c = not False;")

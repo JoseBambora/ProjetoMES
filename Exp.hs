@@ -168,49 +168,47 @@ eval (Div e d)  l = div (eval e l) (eval d l)
 
 -- ===============================================================================
 
-vars = ["a","b","c","d","e","f","g"]
-
 -- Expressões aritméticas / lógicas
 
-faux n = do e1 <- genExpaux (n-1)
-            e2 <- genExpaux (n-1)
-            return ((e1,e2))
+faux n vars = do e1 <- genExpaux (n-1) vars
+                 e2 <- genExpaux (n-1) vars
+                 return ((e1,e2))
 
-fneg n = do e1 <- genExpaux (n-1)
-            return (Neg e1)
+fneg n vars = do e1 <- genExpaux (n-1) vars
+                 return (Neg e1)
 
-fnot n = do e1 <- genExpaux (n-1)
-            return (Not e1)
+fnot n vars = do e1 <- genExpaux (n-1) vars
+                 return (Not e1)
 
-fadd n  = do (e1,e2) <- faux n
-             return (Add e1 e2)
+fadd n vars = do (e1,e2) <- faux n vars
+                 return (Add e1 e2)
 
-fmult n = do (e1,e2) <- faux n
-             return (Mult e1 e2)
+fmult n vars = do (e1,e2) <- faux n vars
+                  return (Mult e1 e2)
 
-fsub n = do (e1,e2) <- faux n
-            return (Sub e1 e2)
+fsub n vars = do (e1,e2) <- faux n vars
+                 return (Sub e1 e2)
 
-fdiv n = do (e1,e2) <- faux n
-            return (Div e1 e2)
+fdiv n vars = do (e1,e2) <- faux n vars
+                 return (Div e1 e2)
 
-fequal n  = do (e1,e2) <- faux n
-               return (Equal e1 e2)
+fequal n vars = do (e1,e2) <- faux n vars
+                   return (Equal e1 e2)
 
-fdif n  = do (e1,e2) <- faux n
-             return (Dif e1 e2)
+fdif n vars = do (e1,e2) <- faux n vars
+                 return (Dif e1 e2)
 
-fless n  = do (e1,e2) <- faux n
-              return (Less e1 e2)
+fless n vars = do (e1,e2) <- faux n vars
+                  return (Less e1 e2)
 
-flesseq n  = do (e1,e2) <- faux n
-                return (LessEq e1 e2)
+flesseq n vars = do (e1,e2) <- faux n vars
+                    return (LessEq e1 e2)
 
-fgreater n  = do (e1,e2) <- faux n
-                 return (Greater e1 e2)
+fgreater n vars = do (e1,e2) <- faux n vars
+                     return (Greater e1 e2)
 
-fgreatereq n  = do (e1,e2) <- faux n
-                   return (GreaterEq e1 e2)
+fgreatereq n vars = do (e1,e2) <- faux n vars
+                       return (GreaterEq e1 e2)
 
 -- Expressões singulares
 
@@ -221,22 +219,22 @@ fconst :: Gen Exp
 fconst = do n <- choose (0,30)
             return (Const n)
 
-fvar :: Gen Exp
-fvar   = do v <- elements vars
-            return (Var v)
+fvar :: [String] -> Gen Exp
+fvar vars = do v <- elements vars
+               return (Var v)
 
-fsingle :: Gen Exp
-fsingle = frequency [(33,fbool),(33,fconst),(33,fvar)]
+fsingle :: [String] -> Gen Exp
+fsingle vars = frequency [(33,fbool),(33,fconst),(33*(length vars),fvar vars)]
 
-flogic :: Int -> Gen Exp
-flogic n = frequency [(1,fequal n),(1, fdif n), (1,fless n), (1,flesseq n), (1,fgreater n), (1,fgreatereq n)]
+flogic :: Int -> [String] -> Gen Exp
+flogic n vars = frequency [(1,fequal n vars),(1, fdif n vars), (1,fless n vars), (1,flesseq n vars), (1,fgreater n vars), (1,fgreatereq n vars)]
 
-farit :: Int -> Gen Exp
-farit n = frequency [(1,fneg n),(1, fnot n), (1,fadd n), (1, fsub n), (1,fdiv n), (1,fmult n)]
+farit :: Int -> [String] -> Gen Exp
+farit n vars = frequency [(1,fneg n vars),(1, fnot n vars), (1,fadd n vars), (1, fsub n vars), (1,fdiv n vars), (1,fmult n vars)]
 
-genExpaux :: Int -> Gen Exp
-genExpaux 0 = fsingle
-genExpaux n = frequency [(50, flogic n),(50,farit n)]
+genExpaux :: Int -> [String] -> Gen Exp
+genExpaux 0 vars = fsingle vars
+genExpaux n vars = frequency [(50, flogic n vars),(50,farit n vars)]
 
-genExp :: Gen Exp
-genExp = genExpaux 1
+genExp :: [String] -> Gen Exp
+genExp l = genExpaux 1 l
