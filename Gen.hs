@@ -6,6 +6,7 @@ import PicoC
 import Parser
 import Exp
 import Inst
+import Data.List
 
 prop_parser :: PicoC -> Bool
 prop_parser (PicoC c) = parser (unparser (PicoC c)) == (PicoC c)
@@ -59,6 +60,21 @@ prop_dev_varsaux (x:xs) vars | ea && eb = prop_dev_varsaux xs ev
 prop_dev_vars :: PicoC -> Bool
 prop_dev_vars (PicoC l) = prop_dev_varsaux l []
 
+
+prop_unica_declaracao :: PicoC -> Bool
+prop_unica_declaracao (PicoC insts) = length f5 == 0
+     where
+        f1 = map varName insts
+        f2 = filter (\x -> length x > 0) f1
+        f3 = (group . sort) f2
+        f4 = foldl (\acc x -> (head x, length x):acc) [] f3
+        f5 = filter (\(_,y) -> y > 1) f4 
+
+varName :: Inst -> String
+varName (Dec _ x) = x
+varName (Atrib "" _ _) = ""
+varName (Atrib _ x _) = x
+varName _ = ""
 
 -- teste
 testepropvars = prop_dev_vars (parser "char e = not True; int d = e!=e; if (3==False) then {         e*e; } else {         e = -e; } char c = not False;")
