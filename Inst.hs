@@ -90,7 +90,7 @@ unparserInsts t l = foldr (\x acc -> x ++ "\n" ++ acc)""(map (unparserInst t) l)
           | IFE Exp BlocoC BlocoC
 -}
 
-types = ["int","char"]
+types = ["int","char","bool"]
 varslista = ["a","b","c","d","e","f"]
 
 getNVar :: [String] -> [String]
