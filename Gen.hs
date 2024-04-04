@@ -1,3 +1,10 @@
+{-
+Grupo:
+- PG53975 José Carvalho
+- PG54097 Miguel Silva
+- PG52689 José Barbosa
+-}
+
 {-# LANGUAGE DeriveDataTypeable #-}
 module Gen where 
 

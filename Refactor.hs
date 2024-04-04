@@ -4,6 +4,7 @@ Grupo:
 - PG54097 Miguel Silva
 - PG52689 José Barbosa
 -}
+
 {-# LANGUAGE DeriveDataTypeable #-}
 module Refactor where
 
