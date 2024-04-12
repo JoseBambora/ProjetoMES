@@ -6,9 +6,6 @@ import Inst
 
 type Inputs = [(String,Int)]
 
-
-
-
 eval :: Exp -> Inputs -> Int
 eval (Const i)  _ = i
 eval (Bool b) _ = if b then 1 else 0
@@ -25,16 +22,6 @@ eval (Greater e d)   l = if (eval e l > eval d l) then 1 else 0
 eval (GreaterEq e d) l = if (eval e l >= eval d l) then 1 else 0
 eval (Less e d)      l = if (eval e l < eval d l) then 1 else 0
 eval (LessEq e d)    l = if (eval e l <= eval d l) then 1 else 0
-
-
-{-
-Inline Exp
-          | Dec String String
-          | Atrib String String Exp
-          | While Exp BlocoC
-          | IFE Exp BlocoC BlocoC
-          | Return Exp
--}
 
 takeout :: String -> Inputs -> Inputs
 takeout s = filter (\(x,_) -> x /= s)
