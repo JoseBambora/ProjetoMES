@@ -25,6 +25,7 @@ data Inst = Inline Exp
           | Atrib String String Exp
           | While Exp BlocoC
           | IFE Exp BlocoC BlocoC
+          | Return Exp
       deriving (Eq, Data)
 
 instance StrategicData Inst
@@ -55,12 +56,16 @@ pIFE = (\_ c _ x _ y -> IFE c x y) <$> token' "if" <*> pExpPar <*> token' "then"
 pInline :: Parser Inst
 pInline = (\x _ -> Inline x) <$> pExp <*> symbol' ';'
 
+pReturn :: Parser Inst
+pReturn = (\_ x _ -> Return x) <$> token' "return" <*> pExp <*> symbol' ';'
+
 pLine :: Parser Inst
 pLine =   pDec
       <|> pAtrib
       <|> pWhile
       <|> pIFE
       <|> pInline
+      <|> pReturn
 
 
 pBlocoC :: Parser BlocoC

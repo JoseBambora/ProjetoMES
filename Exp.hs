@@ -153,19 +153,6 @@ unparserExp b (Less x y)       = unparserExpAux2 b (unparserExpAux x y "<" )
 unparserExp b (LessEq x y)     = unparserExpAux2 b (unparserExpAux x y "<=")
 unparserExp b (Greater x y)    = unparserExpAux2 b (unparserExpAux x y ">" )
 unparserExp b (GreaterEq x y)  = unparserExpAux2 b (unparserExpAux x y ">=")
-
-
--- ===============================================================================
-
-
-eval :: Exp -> [(String, Int)]-> Int
-eval (Const i)  _ = i
-eval (Var v)    l = fromJust (lookup v l)
-eval (Add e d)  l = eval e l + eval d l
-eval (Mult e d) l = eval e l * eval d l
-eval (Sub e d)  l = eval e l - eval d l
-eval (Div e d)  l = div (eval e l) (eval d l)
-
 -- ===============================================================================
 
 -- Expressões aritméticas / lógicas
