@@ -50,10 +50,3 @@ evaluate :: PicoC -> Inputs -> Int
 evaluate (PicoC insts) input = res
     where
         (res,_,_) = evalInsts insts input
-
-
-tester1 = PicoC [(IFE (Const 1) [(Return (Var "a"))] [(Return (Const 30))])]
-tester2 = PicoC [(IFE (Const 0) [(Return (Bool False))] [(Return (Bool True))])]
-tester3 = PicoC [(IFE (Not (Const 0)) [(Return (Bool False))] [(Return (Bool True))])]
-tester4 = PicoC [Atrib "" "b" (Add (Var "b") (Const 2)), Return (Var "b")]
-tester5 = PicoC [(While (Var "a") [Atrib "" "b" (Add (Var "b") (Const 2)), Atrib "" "a" (Sub (Var "a") (Const 1))]), Return (Var "b")]
