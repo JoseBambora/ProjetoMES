@@ -83,17 +83,10 @@ unparserInst n (Atrib t a b) = replicate n '\t' ++ ty ++ a ++ " = " ++ show b ++
 unparserInst n (While c b)   = replicate n '\t' ++ "while ("  ++ show c ++ "){\n" ++ (unparserInsts (n+1) b) ++ replicate n '\t' ++ "}"
 unparserInst n (IFE c i e)   = replicate n '\t' ++ "if ("     ++ show c ++ ") then {\n" ++ (unparserInsts (n+1) i) ++ replicate n '\t' ++ "} else {\n" ++ (unparserInsts (n+1) e) ++ replicate n '\t' ++ "}"
 unparserInst n (Inline c)    = replicate n '\t' ++ show c ++ ";"
+unparserInst n (Return e)    = replicate n '\t' ++ "return " ++ show e ++ ";"
 
 unparserInsts :: Int -> [Inst] -> String
 unparserInsts t l = foldr (\x acc -> x ++ "\n" ++ acc)""(map (unparserInst t) l)
-
-{-
-          | Inline Exp
-          | Dec String String
-          | Atrib String String Exp
-          | While Exp BlocoC
-          | IFE Exp BlocoC BlocoC
--}
 
 types = ["int","char","bool"]
 varslista = ["a","b","c","d","e","f"]
