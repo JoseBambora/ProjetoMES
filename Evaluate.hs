@@ -57,7 +57,7 @@ evalCorpoWhile cond bloco input insts | end = (res,end,ni,exec_insts)
         (res,end,ni, exec_insts) = evalInsts bloco input insts
 
 evalWhile :: Exp -> [Inst] -> Inputs -> [String] -> (Int,Bool, Inputs, [String])
-evalWhile cond bloco input insts | (evalCond conelsed input) = evalCorpoWhile cond bloco input new_insts
+evalWhile cond bloco input insts | (evalCond cond input) = evalCorpoWhile cond bloco input new_insts
                                  | otherwise = (0,False,input,new_insts)
     where
         new_insts = insts++[printCond cond]
