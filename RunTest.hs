@@ -6,16 +6,19 @@ import Exp
 import Inst
 import Mutations
 
-programa1 = PicoC [(IFE (Const 1) [(Return (Var "a"))] [(Return (Const 30))])]
+programa1 = PicoC [(IFE (Bool True) [(Print (Add (Const 2) (Const 3))),(Return (Var "a"))] [(Return (Const 30))])]
 programa2 = PicoC [(IFE (Const 0) [(Return (Bool False))] [(Return (Bool True))])]
 programa3 = PicoC [(IFE (Not (Const 0)) [(Return (Bool False))] [(Return (Bool True))])]
 programa4 = PicoC [Atrib "" "b" (Add (Var "b") (Const 2)), Return (Var "b")]
 programa5 = PicoC [(Dec "int" "c"), Atrib "" "c" (Const 2), Atrib "int" "d" (Const 3) , (While (Var "a") [Atrib "" "b" (Add (Var "b") (Const 2)), Atrib "" "a" (Sub (Var "a") (Const 1))]), Return (Var "b")]
 
+runEvaluate :: PicoC -> Inputs -> (Int,[String])
+runEvaluate ast l = (result,insts)
+    where 
+        (result,insts,prints) = evaluate ast l
 
 runTest :: PicoC -> (Inputs, Int) -> Bool
-runTest ast (l, r) = result == r
-    where (result,insts) = evaluate ast l
+runTest ast (l, r) = fst (runEvaluate ast l) == r
 
 runTestSuite :: PicoC -> [(Inputs, Int)] -> Bool
 runTestSuite ast = all (\(inputs, expected) -> runTest ast (inputs, expected))
@@ -24,8 +27,7 @@ runTestSuiteMutation :: PicoC -> [(Inputs, Int)] -> Bool
 runTestSuiteMutation ast = all (\(inputs, expected) -> runTest (mutationPicoC ast) (inputs, expected))
 
 runTestInsts :: PicoC -> (Inputs, Int) -> [String]
-runTestInsts ast (l, r)  = insts
-    where (result,insts) = evaluate ast l
+runTestInsts ast (l, r)  = snd (runEvaluate ast l)
 
 runTestSuiteInsts :: PicoC -> [(Inputs, Int)] -> [[String]]
 runTestSuiteInsts ast = map (\(inputs, expected) -> runTestInsts ast (inputs, expected))
@@ -52,3 +54,12 @@ testeRun12 = runTestSuiteMutation programa2 [(input1, 1) , (input2, 1)]
 
 testeRunAll = testeRun1 && testeRun2 && testeRun3 && testeRun4
 testeRunAllMutation = testeRun9 && testeRun10 && testeRun11 && testeRun12
+
+
+
+testPrint :: PicoC -> Inputs -> IO ()
+testPrint ast l = do putStrLn printLine
+    where 
+        (result,insts,prints) = evaluate ast l
+        p = (foldr (\x acc -> x ++ "\n" ++ acc) "" prints)
+        printLine = take (length p - 1) p

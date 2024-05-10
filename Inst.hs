@@ -26,6 +26,7 @@ data Inst = Inline Exp
           | While Exp BlocoC
           | IFE Exp BlocoC BlocoC
           | Return Exp
+          | Print Exp
       deriving (Eq, Data)
 
 instance StrategicData Inst
@@ -59,6 +60,9 @@ pInline = (\x _ -> Inline x) <$> pExp <*> symbol' ';'
 pReturn :: Parser Inst
 pReturn = (\_ x _ -> Return x) <$> token' "return" <*> pExp <*> symbol' ';'
 
+pPrint :: Parser Inst
+pPrint = (\_ x _ -> Return x) <$> token' "print" <*> enclosedBy (symbol' '(') pExp ((symbol' ')'))<*> symbol' ';'
+
 pLine :: Parser Inst
 pLine =   pDec
       <|> pAtrib
@@ -66,7 +70,7 @@ pLine =   pDec
       <|> pIFE
       <|> pInline
       <|> pReturn
-
+      <|> pPrint
 
 pBlocoC :: Parser BlocoC
 pBlocoC  = enclosedBy (symbol' '{') (pBlocoC) (symbol' '}')
@@ -84,6 +88,8 @@ unparserInst n (While c b)   = replicate n '\t' ++ "while ("  ++ show c ++ "){\n
 unparserInst n (IFE c i e)   = replicate n '\t' ++ "if ("     ++ show c ++ ") then {\n" ++ (unparserInsts (n+1) i) ++ replicate n '\t' ++ "} else {\n" ++ (unparserInsts (n+1) e) ++ replicate n '\t' ++ "}"
 unparserInst n (Inline c)    = replicate n '\t' ++ show c ++ ";"
 unparserInst n (Return e)    = replicate n '\t' ++ "return " ++ show e ++ ";"
+unparserInst n (Print e)     = replicate n '\t' ++ "print(" ++ show e ++ ");"
+
 
 unparserInsts :: Int -> [Inst] -> String
 unparserInsts t l = foldr (\x acc -> x ++ "\n" ++ acc)""(map (unparserInst t) l)
