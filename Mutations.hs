@@ -23,6 +23,7 @@ mutationHelper (Sub e1 e2) = Just (Equal e1 e2)
 mutationHelper (Mult e1 e2) = Just (Div e1 e2)
 mutationHelper (Div e1 e2) = Just (Add e1 e2)
 mutationHelper (Equal e1 e2) = Just (Sub e1 e2)
+mutationHelper (Var a) = Just (Sub (Var a) (Const 2))
 mutationHelper _ = Nothing
 
 mutationExpList :: Exp -> [Exp]
